@@ -11,7 +11,9 @@ class Calculator {
     this.operation = undefined;
   }
 
-  delete() {}
+  delete() {
+    this.currentOperand = this.currentOperand.toString().slice(0, -1);
+  }
 
   appendNumber(number) {
     if (number === "." && this.currentOperand.includes(".")) return;
@@ -19,16 +21,63 @@ class Calculator {
   }
 
   chooseOperation(operation) {
+    if (this.currentOperand === "") return;
+    if (this.previousOperand !== "") {
+      this.compute();
+    }
     this.operation = operation;
     this.previousOperand = this.currentOperand;
     this.currentOperand = "";
   }
 
-  compute() {}
+  compute() {
+    let computation;
+    const previous = parseFloat(this.previousOperand);
+    const current = parseFloat(this.currentOperand);
+
+    if (isNaN(previous) || isNaN(current)) return;
+
+    switch (this.operation) {
+      case "+":
+        computation = previous + current;
+        break;
+
+      case "-":
+        computation = previous - current;
+        break;
+
+      case "*":
+        computation = previous * current;
+        break;
+
+      case "÷":
+        computation = previous / current;
+        break;
+
+      default:
+        return;
+    }
+    this.currentOperand = computation;
+    this.operation = undefined;
+    this.previousOperand = "";
+  }
+
+  getDisplayNumber(number) {
+    const floatNumber = parseFloat(number);
+    if (isNaN(floatNumber)) return "";
+    return floatNumber.toLocaleString("en");
+  }
 
   updateDisplay() {
-    this.currentOperandTextElement.innerText = this.currentOperand;
-    this.previousOperandTextElement.innerText = this.previousOperand;
+    this.currentOperandTextElement.innerText = this.getDisplayNumber(
+      this.currentOperand
+    );
+
+    if (this.operation != null) {
+      this.previousOperandTextElement.innerText = `${this.getDisplayNumber(
+        this.previousOperand
+      )} ${this.operation}`;
+    }
   }
 }
 
@@ -61,4 +110,19 @@ operationButtons.forEach((button) => {
     calculator.chooseOperation(button.innerText);
     calculator.updateDisplay();
   });
+});
+
+equalsButton.addEventListener("click", () => {
+  calculator.compute();
+  calculator.updateDisplay();
+});
+
+allClearButton.addEventListener("click", () => {
+  calculator.clear();
+  calculator.updateDisplay();
+});
+
+deleteButton.addEventListener("click", () => {
+  calculator.delete();
+  calculator.updateDisplay();
 });
